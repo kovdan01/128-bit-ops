@@ -72,11 +72,50 @@ static void sum_modulo_common(bm::State& state)
 
     for (auto _ : state)
     {
-        ak_mpzn_add_montgomery(sum, x, y, p, 2);
+        ak_mpzn_add_montgomery(sum, x, y, p, ak_mpzn128_size);
         bm::DoNotOptimize(sum);
     }
 }
 BENCHMARK(sum_modulo_common);
+
+static void sub_128(bm::State& state)
+{
+    INIT_X_Y;
+    ak_mpzn128 sub;
+
+    for (auto _ : state)
+    {
+        ak_uint64 ans = ak_128_sub(sub, x, y);
+        bm::DoNotOptimize(ans);
+    }
+}
+BENCHMARK(sub_128);
+
+static void sub_common(bm::State& state)
+{
+    INIT_X_Y;
+    ak_mpzn128 sub;
+
+    for (auto _ : state)
+    {
+        ak_uint64 ans = ak_mpzn_sub(sub, x, y, ak_mpzn128_size);
+        bm::DoNotOptimize(ans);
+    }
+}
+BENCHMARK(sub_common);
+
+static void sub_modulo_128(bm::State& state)
+{
+    INIT_X_Y_P;
+    ak_mpzn128 sub;
+
+    for (auto _ : state)
+    {
+        ak_128_sub_mod(sub, x, y, p);
+        bm::DoNotOptimize(sub);
+    }
+}
+BENCHMARK(sub_modulo_128);
 
 static void mul_128(bm::State& state)
 {
@@ -98,7 +137,7 @@ static void mul_common(bm::State& state)
 
     for (auto _ : state)
     {
-        ak_mpzn_mul(mul, x, y, 2);
+        ak_mpzn_mul(mul, x, y, ak_mpzn128_size);
         bm::DoNotOptimize(mul);
     }
 }
