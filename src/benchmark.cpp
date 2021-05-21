@@ -156,6 +156,50 @@ static void mul_modulo_128(bm::State& state)
 }
 BENCHMARK(mul_modulo_128);
 
+static void mul_montgomery_128(bm::State& state)
+{
+    INIT_X_Y_P;
+
+    ak_montgomery_context_128 ctx;
+    ak_mpzn_set(ctx.p, p, ak_mpzn128_size);
+    ak_128_montgomery_init(&ctx);
+
+    ak_mpzn128 x_mont, y_mont;
+    ak_128_to_montgomery(x_mont, x, &ctx);
+    ak_128_to_montgomery(y_mont, y, &ctx);
+
+    ak_mpzn128 mul;
+
+    for (auto _ : state)
+    {
+        ak_128_montgomery_mul(mul, x_mont, y_mont, &ctx);
+        bm::DoNotOptimize(mul);
+    }
+}
+BENCHMARK(mul_montgomery_128);
+
+static void mul_montgomery_common(bm::State& state)
+{
+    INIT_X_Y_P;
+
+    ak_montgomery_context_128 ctx;
+    ak_mpzn_set(ctx.p, p, ak_mpzn128_size);
+    ak_128_montgomery_init(&ctx);
+
+    ak_mpzn128 x_mont, y_mont;
+    ak_128_to_montgomery(x_mont, x, &ctx);
+    ak_128_to_montgomery(y_mont, y, &ctx);
+
+    ak_mpzn128 mul;
+
+    for (auto _ : state)
+    {
+        ak_mpzn_mul_montgomery(mul, x_mont, y_mont, ctx.p, ctx.v[0], ak_mpzn128_size);
+        bm::DoNotOptimize(mul);
+    }
+}
+BENCHMARK(mul_montgomery_common);
+
 static void inverse_128(bm::State& state)
 {
     INIT_X;
