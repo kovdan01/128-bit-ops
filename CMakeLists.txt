@@ -10,6 +10,7 @@ include(ntc-dev-build)
 find_package(Akrypt REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(benchmark REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_package(Threads REQUIRED)
 
 # tests-main
@@ -35,6 +36,7 @@ target_compile_features(${TESTS_NAME} PRIVATE cxx_std_20)
 
 target_link_libraries(${TESTS_NAME} PRIVATE akrypt::akrypt)
 target_link_libraries(${TESTS_NAME} PRIVATE Catch2::Catch2)
+target_link_libraries(${TESTS_NAME} PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(${TESTS_NAME} PRIVATE ${TESTS_MAIN_NAME})
 
 ntc_target(${TESTS_NAME})
