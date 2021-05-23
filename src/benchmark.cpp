@@ -200,6 +200,50 @@ static void mul_montgomery_common(bm::State& state)
 }
 BENCHMARK(mul_montgomery_common);
 
+static void modpow_montgomery_128(bm::State& state)
+{
+    INIT_X_Y_P;
+
+    ak_montgomery_context_128 ctx;
+    ak_mpzn_set(ctx.p, p, ak_mpzn128_size);
+    ak_128_montgomery_init(&ctx);
+
+    ak_mpzn128 x_mont, y_mont;
+    ak_128_to_montgomery(x_mont, x, &ctx);
+    ak_128_to_montgomery(y_mont, y, &ctx);
+
+    ak_mpzn128 modpow;
+
+    for (auto _ : state)
+    {
+        ak_128_montgomery_modpow(modpow, x, y, &ctx);
+        bm::DoNotOptimize(modpow);
+    }
+}
+BENCHMARK(modpow_montgomery_128);
+
+static void modpow_montgomery_common(bm::State& state)
+{
+    INIT_X_Y_P;
+
+    ak_montgomery_context_128 ctx;
+    ak_mpzn_set(ctx.p, p, ak_mpzn128_size);
+    ak_128_montgomery_init(&ctx);
+
+    ak_mpzn128 x_mont, y_mont;
+    ak_128_to_montgomery(x_mont, x, &ctx);
+    ak_128_to_montgomery(y_mont, y, &ctx);
+
+    ak_mpzn128 modpow;
+
+    for (auto _ : state)
+    {
+        ak_mpzn_modpow_montgomery(modpow, x, y, ctx.p, ctx.v[0], ak_mpzn128_size);
+        bm::DoNotOptimize(modpow);
+    }
+}
+BENCHMARK(modpow_montgomery_common);
+
 static void inverse_128(bm::State& state)
 {
     INIT_X;
@@ -213,6 +257,28 @@ static void inverse_128(bm::State& state)
     }
 }
 BENCHMARK(inverse_128);
+
+static void inverse_montgomery_128(bm::State& state)
+{
+    INIT_X;
+    INIT_P;
+
+    ak_montgomery_context_128 ctx;
+    ak_mpzn_set(ctx.p, p, ak_mpzn128_size);
+    ak_128_montgomery_init(&ctx);
+
+    ak_mpzn128 x_mont;
+    ak_128_to_montgomery(x_mont, x, &ctx);
+
+    ak_mpzn128 inverse;
+
+    for (auto _ : state)
+    {
+        ak_128_montgomery_inverse(inverse, x, &ctx);
+        bm::DoNotOptimize(inverse);
+    }
+}
+BENCHMARK(inverse_montgomery_128);
 
 static void point_add_128(bm::State& state)
 {

@@ -154,6 +154,23 @@ TEST_CASE("128-bit test", "128")
                 ak_mpzn_mul_montgomery(mul_common_got, x_mont_got, y_mont_got, ctx.p, ctx.v[0], ak_mpzn128_size);
                 REQUIRE(ak_128_equal(mul_common_got, mul_expected));
             }
+            // Inverse
+            {
+                ak_mpzn128 inverse_got, inverse_got_montgomery, inverse_expected;
+                ak_mpzn_set_hexstr(inverse_expected, ak_mpzn128_size, elem["inverse_modulo"].get<std::string>().c_str());
+                ak_128_montgomery_inverse(inverse_got_montgomery, x_mont_correct, &ctx);
+                ak_128_from_montgomery(inverse_got, inverse_got_montgomery, &ctx);
+
+                REQUIRE(ak_128_equal(inverse_got,  inverse_expected));
+            }
+            // Modpow
+            {
+                ak_mpzn128 got, expected;
+                ak_mpzn_modpow_montgomery(expected, x, y, p, ctx.v[0], ak_mpzn128_size);
+                ak_128_montgomery_modpow(got, x, y, &ctx);
+
+                REQUIRE(ak_128_equal(got,  expected));
+            }
         }
     }
 }
